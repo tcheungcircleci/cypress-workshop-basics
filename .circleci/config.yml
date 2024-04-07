@@ -9,4 +9,10 @@ workflows:
       - cypress/run:
           name: Cypress E2E Tests
           start-command: 'npm start'
-          cypress-command: 'npx cypress run --config-file cypress.ci-config.js'
+          cypress-command: |
+            npm install cypress-circleci-reporter
+            TEST_FILES=$(find ./cypress -regextype posix-extended -regex ".*[-.](cy|spec).(js|ts)")
+            echo "$TEST_FILES" | circleci tests run --command="xargs npx cypress run --config-file cypress.ci-config.js --reporter cypress-circleci-reporter --spec" --verbose
+          post-steps:
+            - store_test_results:
+                path: test_results
